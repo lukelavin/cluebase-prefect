@@ -1,2 +1,5 @@
 requests
 beautifulsoup4
+tqdm
+pymongo
+prefect

@@ -1,1 +1,6 @@
 venv
+__pycache__
+raw
+metadata
+.isort.cfg
+load_logs
