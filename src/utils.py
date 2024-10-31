@@ -15,6 +15,7 @@ def download_html(url, write_path, overwrite=False):
     r = requests.get(url)
 
     if r.ok:
+        print(f"Writing to {write_path}")
         with open(write_path, "w+") as f:
             f.write(r.text)
 

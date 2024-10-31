@@ -1,24 +1,26 @@
 import os
-import random
-import time
 
-import requests
 from bs4 import BeautifulSoup
-from tqdm import tqdm
 
-from src.paths import RAW_DIR, RAW_GAMES_DIR, RAW_LIST_SEASONS, RAW_SEASONS_DIR
+from src.paths import (
+    RAW_DIR,
+    RAW_GAMES_DIR,
+    RAW_LIST_SEASONS,
+    RAW_LIST_SEASONS_NAME,
+    RAW_SEASONS_DIR,
+)
 from src.urls import BASE_URL, GAME, LIST_SEASONS, SEASON
 from src.utils import download_html
 
 
-def parse_season_urls(list_seasons_path):
+def parse_season_urls(list_seasons_path=RAW_LIST_SEASONS):
     with open(list_seasons_path, "r") as html_doc:
         soup = BeautifulSoup(html_doc, "html.parser")
         season_table = soup.find("table")
         return [link.get("href") for link in season_table.find_all("a")]
 
 
-def parse_season_ids(list_seasons_path):
+def parse_season_ids(list_seasons_path=RAW_LIST_SEASONS):
     with open(list_seasons_path, "r") as html_doc:
         soup = BeautifulSoup(html_doc, "html.parser")
         season_table = soup.find("table")
@@ -47,13 +49,14 @@ def parse_game_ids(season_page_path):
 def parse_all_game_ids(season_page_dir=RAW_SEASONS_DIR):
     game_ids = []
     for season_file in os.listdir(season_page_dir):
+        print(f"Parsing game IDs from {os.path.join(season_page_dir, season_file)}")
         game_ids += parse_game_ids(os.path.join(season_page_dir, season_file))
 
     return game_ids
 
 
 def download_season_list(
-    target_dir=RAW_DIR, target_filename=RAW_LIST_SEASONS, overwrite=False
+    target_dir=RAW_DIR, target_filename=RAW_LIST_SEASONS_NAME, overwrite=False
 ):
     """
     Download Season List page.

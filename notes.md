@@ -124,3 +124,17 @@ Alex ()
 - Clues can be identified by the game they are in, as well as their place on the game board.
 - Construct a clue id made up of the game id, round number, category index, and row number
 - Let mongo catch duplicates by making this compound id the `_id` field.
+
+
+
+
+### Prefect steps
+
+Install prefect
+
+Authenticate prefect cloud CLI
+
+Create flows/tasks
+
+Run flow to test
+
