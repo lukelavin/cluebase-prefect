@@ -3,8 +3,10 @@ import os
 from functools import cache, partial
 from io import BytesIO
 from logging import getLogger
+from typing import Any, Dict, List, Optional
 
 import requests
+from prefect.utilities.asyncutils import run_sync_in_worker_thread
 from prefect_aws import AwsCredentials, S3Bucket
 from pymongo import AsyncMongoClient
 from pymongo.database import Database
@@ -133,3 +135,29 @@ async def ls_s3_async(bucket_name: str, path: str) -> str:
     response = await bucket.list_objects(path)
 
     return tuple(s3_object["Key"] for s3_object in response)
+
+
+async def ls_s3_prefix(
+    self,
+    folder: str = "",
+    delimiter: str = "",
+    prefix: str = "",
+    page_size: Optional[int] = None,
+    max_items: Optional[int] = None,
+    jmespath_query: Optional[str] = None,
+) -> List[Dict[str, Any]]:
+    bucket_path = self._join_bucket_folder(folder) + "/" + prefix
+    client = self.credentials.get_s3_client()
+    paginator = client.get_paginator("list_objects_v2")
+    page_iterator = paginator.paginate(
+        Bucket=self.bucket_name,
+        Prefix=bucket_path,
+        Delimiter=delimiter,
+        PaginationConfig={"PageSize": page_size, "MaxItems": max_items},
+    )
+    if jmespath_query:
+        page_iterator = page_iterator.search(f"{jmespath_query} | {{Contents: @}}")
+
+    self.logger.info(f"Listing objects in bucket {bucket_path}.")
+    objects = await run_sync_in_worker_thread(self._list_objects_sync, page_iterator)
+    return objects
