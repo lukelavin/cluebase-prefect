@@ -68,7 +68,7 @@ def get_s3_bucket(
 
 
 def object_exists(bucket: S3Bucket, path: str) -> bool:
-    return path in ls_s3(bucket.bucket_name, path.split("/")[:-1])
+    return path in ls_s3(bucket.bucket_name, path[: path.rfind("/")])
     # return bool(bucket.list_objects(path))
 
 
