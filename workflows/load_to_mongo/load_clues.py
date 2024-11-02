@@ -1,4 +1,5 @@
 import asyncio
+import itertools
 import logging
 import os
 from logging import getLogger
@@ -91,11 +92,13 @@ async def load_clues_batch_s3(
 
     game_paths = await ls_s3_prefix(bucket, games_dir, prefix=game_file_prefix)
 
-    clues = [
+    clue_lists = [
         await asyncio.gather(
-            *[read_and_parse_clues(bucket, s3_path) for s3_path in game_paths]
+            [read_and_parse_clues(bucket, s3_path) for s3_path in game_paths]
         )
     ]
+
+    clues = list(itertools.chain_from_iterable(clue_lists))
 
     file_logger.debug(f"Attempting to load {len(clues)} clues into collection")
     try:
