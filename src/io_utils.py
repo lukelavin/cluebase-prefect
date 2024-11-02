@@ -102,7 +102,7 @@ def read_s3_object(bucket: S3Bucket, path: str) -> str:
     return bucket.read_path(path)
 
 
-@cache()
+@cache
 def ls_s3(bucket: S3Bucket, path: str) -> str:
     response = bucket.list_objects(path)
 
