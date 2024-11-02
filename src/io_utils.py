@@ -79,7 +79,7 @@ def upload_object(bucket: S3Bucket, path: str, content: str) -> str:
 def download_html_to_s3(
     url: str, bucket: S3Bucket, write_path: str, overwrite=False
 ) -> str:
-    if object_exists(bucket) and not overwrite:
+    if object_exists(bucket, write_path) and not overwrite:
         print(f"{write_path} exists, skipping download")
         return None
 

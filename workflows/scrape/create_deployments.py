@@ -13,10 +13,15 @@ if __name__ == "__main__":
         credentials=GitHubCredentials.load("github-cluebase2"),
     )
 
+    pip_packages = []
+    with open("requirements.txt", "r") as f:
+        pip_packages = f.read().splitlines()
+
     flow.from_source(
         source=github_repo, entrypoint="workflows/scrape/refresh_all.py:refresh_all"
     ).deploy(
         name="github-deploy",
         work_pool_name="my-work-pool",
         cron="0 1 * * *",
+        job_variables={"pip_packages": pip_packages},
     )

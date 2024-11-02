@@ -143,3 +143,10 @@ Create flows/tasks
 Run flow to test
 
 configure prefect AWS credentials block in UI (easier than creating w/ script because of handling secrets)
+
+### Prefect trouble
+
+moving to s3
+
+pip packages and no logs
+
