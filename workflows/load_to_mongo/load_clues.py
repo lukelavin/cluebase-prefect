@@ -66,7 +66,7 @@ async def load_all_game_files_s3(
 
     mongo_conn_str = (await Secret.load(mongo_secret_block)).get()
     mongo_client = await get_mongo_client(mongo_conn_str)
-    db = get_db(mongo_client)
+    db = await get_db(mongo_client)
 
     games = await ls_s3_async(s3_bucket_name, games_dir)
 
