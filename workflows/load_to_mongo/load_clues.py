@@ -7,6 +7,7 @@ import pymongo
 from prefect import flow, task
 from prefect.blocks.system import Secret
 from prefect_aws.s3 import S3Bucket
+from prefect.cache_policies import INPUTS
 from pymongo.database import Database
 from tqdm.asyncio import tqdm
 
@@ -25,8 +26,7 @@ from src.paths import RAW_GAMES_DIR
 
 file_logger = logging.getLogger(__name__)
 
-
-@task
+@task(cache_policy=INPUTS - "db")
 async def load_clues_from_game_file(game_file: str, db: Database):
     game_html = read_raw_file(os.path.join(RAW_GAMES_DIR, game_file))
 
@@ -38,7 +38,7 @@ async def load_clues_from_game_file(game_file: str, db: Database):
     await insert_clue_bulk(db, clues)
 
 
-@task
+@task(cache_policy=INPUTS - "db")
 async def load_clues_from_game_file_s3(bucket: S3Bucket, s3_path: str, db: Database):
     game_html = await read_s3_object_async(bucket, s3_path)
 
@@ -92,7 +92,7 @@ async def load_all_game_files_s3(
 @flow
 async def load_clues_from_all_games_s3(
     s3_bucket_name="cluebase", s3_games_path="raw/games"
-):
+)
     load_all_game_files_s3(s3_bucket_name, s3_games_path)
 
 
