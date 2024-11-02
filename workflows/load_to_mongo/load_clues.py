@@ -65,6 +65,15 @@ async def load_clues_from_game_file_s3(bucket: S3Bucket, s3_path: str, db: Datab
         return []
 
 
+async def read_and_parse_clues(bucket, s3_path):
+    game_html = await read_s3_object_async(bucket, s3_path)
+
+    game_id = s3_path.split("/")[-1].split(".")[0]
+    file_logger.debug(f"Loading clues from game: {game_id}")
+
+    return parse_clues_from_game(game_html, game_id)
+
+
 @task(cache_policy=INPUTS - "db")
 async def load_clues_batch_s3(
     s3_bucket_name: str = "cluebase",
@@ -82,14 +91,11 @@ async def load_clues_batch_s3(
 
     game_paths = await ls_s3_prefix(bucket, games_dir, prefix=game_file_prefix)
 
-    clues = []
-    async for s3_path in game_paths:
-        game_html = await read_s3_object_async(bucket, s3_path)
-
-        game_id = s3_path.split("/")[-1].split(".")[0]
-        file_logger.debug(f"Loading clues from game: {game_id}")
-
-        clues += parse_clues_from_game(game_html, game_id)
+    clues = [
+        await asyncio.gather(
+            *[read_and_parse_clues(bucket, s3_path) for s3_path in game_paths]
+        )
+    ]
 
     file_logger.debug(f"Attempting to load {len(clues)} clues into collection")
     try:
