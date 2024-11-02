@@ -138,7 +138,7 @@ async def ls_s3_async(bucket_name: str, path: str) -> str:
 
 
 async def ls_s3_prefix(
-    self,
+    bucket: S3Bucket,
     folder: str = "",
     delimiter: str = "",
     prefix: str = "",
@@ -146,11 +146,11 @@ async def ls_s3_prefix(
     max_items: Optional[int] = None,
     jmespath_query: Optional[str] = None,
 ) -> List[Dict[str, Any]]:
-    bucket_path = self._join_bucket_folder(folder) + "/" + prefix
-    client = self.credentials.get_s3_client()
+    bucket_path = bucket._join_bucket_folder(folder) + "/" + prefix
+    client = bucket.credentials.get_s3_client()
     paginator = client.get_paginator("list_objects_v2")
     page_iterator = paginator.paginate(
-        Bucket=self.bucket_name,
+        Bucket=bucket.bucket_name,
         Prefix=bucket_path,
         Delimiter=delimiter,
         PaginationConfig={"PageSize": page_size, "MaxItems": max_items},
@@ -158,6 +158,6 @@ async def ls_s3_prefix(
     if jmespath_query:
         page_iterator = page_iterator.search(f"{jmespath_query} | {{Contents: @}}")
 
-    self.logger.info(f"Listing objects in bucket {bucket_path}.")
-    objects = await run_sync_in_worker_thread(self._list_objects_sync, page_iterator)
+    file_logger.info(f"Listing objects in bucket {bucket_path}.")
+    objects = await run_sync_in_worker_thread(bucket._list_objects_sync, page_iterator)
     return objects
