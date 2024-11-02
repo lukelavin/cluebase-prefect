@@ -38,6 +38,7 @@ async def load_clues_from_game_file(game_file: str, db: Database):
     await insert_clue_bulk(db, clues)
 
 
+@task
 async def load_clues_from_game_file_s3(bucket: S3Bucket, s3_path: str, db: Database):
     game_html = await read_s3_object_async(bucket, s3_path)
 
@@ -57,7 +58,7 @@ async def load_all_game_files(games_dir=RAW_GAMES_DIR):
             try:
                 await load_clues_from_game_file(game_file)
             except pymongo.errors.BulkWriteError as e:
-                print(e)
+                file_logger.warning(e)
 
 
 @task
@@ -66,6 +67,8 @@ async def load_all_game_files_s3(
     games_dir: str = RAW_GAMES_DIR,
     mongo_secret_block: str = "mongo-connection-string",
 ):
+    file_logger.info("Loading clues from all game files")
+
     bucket = get_s3_bucket(s3_bucket_name)
 
     mongo_conn_str = (await Secret.load(mongo_secret_block)).get()
@@ -86,7 +89,7 @@ async def load_all_game_files_s3(
 
 @flow
 def load_clues_from_all_games_s3(s3_bucket_name="cluebase", s3_games_path="raw/games"):
-    print("Loading clues from all game files")
+
     asyncio.run(load_all_game_files_s3(s3_bucket_name, s3_games_path))
 
 
