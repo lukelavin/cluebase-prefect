@@ -55,7 +55,7 @@ def parse_all_game_ids(season_page_dir=RAW_SEASONS_DIR):
 
 def parse_all_game_ids_from_s3(bucket, season_page_dir=RAW_SEASONS_DIR):
     game_ids = []
-    for season_file in ls_s3(bucket, season_page_dir):
+    for season_file in ls_s3(bucket.bucket_name, season_page_dir):
         print(f"Parsing game IDs from {season_file}")
         season_html = read_s3_object(bucket, season_file)
         game_ids += parse_game_ids(season_html)
