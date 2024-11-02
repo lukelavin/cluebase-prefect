@@ -63,7 +63,9 @@ async def load_all_game_files_s3(
     mongo_client = await get_mongo_client(mongo_conn_str)
     db = get_db(mongo_client)
 
-    with tqdm(ls_s3(s3_bucket_name, games_dir)) as progress:
+    games = await ls_s3(s3_bucket_name, games_dir)
+
+    with tqdm(games) as progress:
         async for game_file in progress:
             try:
                 await load_clues_from_game_file_s3(game_file, db)

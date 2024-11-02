@@ -126,3 +126,10 @@ def ls_s3(bucket_name: str, path: str) -> str:
     response = bucket.list_objects(path)
 
     return tuple(s3_object["Key"] for s3_object in response)
+
+
+async def ls_s3_async(bucket_name: str, path: str) -> str:
+    bucket = get_s3_bucket(bucket_name)
+    response = await bucket.list_objects(path)
+
+    return tuple(s3_object["Key"] for s3_object in response)
