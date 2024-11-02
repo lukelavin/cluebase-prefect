@@ -107,4 +107,4 @@ def ls_s3(bucket_name: str, path: str) -> str:
     bucket = get_s3_bucket(bucket_name)
     response = bucket.list_objects(path)
 
-    return [s3_object["Key"] for s3_object in response]
+    return tuple(s3_object["Key"] for s3_object in response)
