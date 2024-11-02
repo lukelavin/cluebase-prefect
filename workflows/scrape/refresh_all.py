@@ -9,9 +9,9 @@ def refresh_all(bucket_name="cluebase", overwrite: bool = False):
     if bucket_name:
         print("Refreshing files in bucket: {cluebase}")
 
-    refresh_season_list(bucket_name)
+    refresh_season_list(bucket_name, overwrite=False)
 
-    refresh_seasons(bucket_name)
+    refresh_seasons(bucket_name, overwrite=False)
 
     refresh_games(bucket_name, overwrite=overwrite)
 

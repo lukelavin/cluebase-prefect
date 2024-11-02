@@ -82,7 +82,7 @@ def refresh_games(
         game_ids = parse_all_game_ids_from_s3(bucket, raw_seasons_dir)
 
         for game_id in tqdm(game_ids):
-            success = download_game_page_to_s3(game_id, overwrite=overwrite)
+            success = download_game_page_to_s3(game_id, bucket, overwrite=overwrite)
             if success:
                 if sleep == "random":
                     time.sleep(random.uniform(0.2, 2.0))
