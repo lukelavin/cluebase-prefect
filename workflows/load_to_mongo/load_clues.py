@@ -1,5 +1,7 @@
 import asyncio
+import logging
 import os
+from logging import getLogger
 
 import pymongo
 from prefect import flow, task
@@ -21,28 +23,30 @@ from src.io_utils import (
 )
 from src.paths import RAW_GAMES_DIR
 
+file_logger = logging.getLogger(__name__)
+
 
 @task
 async def load_clues_from_game_file(game_file: str, db: Database):
     game_html = read_raw_file(os.path.join(RAW_GAMES_DIR, game_file))
 
     game_id = game_file.split(".")[0]
-    print(f"Loading clues from game: {game_id}")
+    file_logger.debug(f"Loading clues from game: {game_id}")
 
     clues = parse_clues_from_game(game_html, game_id)
 
     await insert_clue_bulk(db, clues)
 
 
-@task
 async def load_clues_from_game_file_s3(bucket: S3Bucket, s3_path: str, db: Database):
     game_html = await read_s3_object_async(bucket, s3_path)
 
     game_id = s3_path.split("/")[-1].split(".")[0]
-    print(f"Loading clues from game: {game_id}")
+    file_logger.debug(f"Loading clues from game: {game_id}")
 
     clues = parse_clues_from_game(game_html, game_id)
 
+    file_logger.debug(f"Attempting to load {len(clues)} clues into collection")
     await insert_clue_bulk(db, clues)
 
 
@@ -69,13 +73,15 @@ async def load_all_game_files_s3(
     db = await get_db(mongo_client)
 
     games = await ls_s3_async(s3_bucket_name, games_dir)
+    file_logger.info(f"Found {len(games)} games to load")
+    file_logger.info(f"Game examples: {games[:5]}")
 
     with tqdm(games) as progress:
         async for game_file in progress:
             try:
                 await load_clues_from_game_file_s3(bucket, game_file, db)
             except pymongo.errors.BulkWriteError as e:
-                print(e)
+                file_logger.warn(e)
 
 
 @flow
