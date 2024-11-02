@@ -1,5 +1,6 @@
 import random
 import time
+from logging import getLogger
 
 from prefect import task
 from tqdm import tqdm
@@ -20,6 +21,8 @@ from src.scrape_raw import (
 
 ## TODO: surface parameters from functions all the way up to workflows
 ## TODO: turn prints into logging with proper log levels
+
+file_logger = getLogger(__name__)
 
 
 @task
@@ -76,6 +79,8 @@ def refresh_games(
     sleep="random",
     raw_seasons_dir=RAW_SEASONS_DIR,
 ):
+    skipped = 0
+    downloaded = 0
     if s3_bucket_name:
         bucket = get_s3_bucket(s3_bucket_name)
 
@@ -84,10 +89,13 @@ def refresh_games(
         for game_id in tqdm(game_ids):
             success = download_game_page_to_s3(game_id, bucket, overwrite=overwrite)
             if success:
+                downloaded += 1
                 if sleep == "random":
                     time.sleep(random.uniform(0.2, 2.0))
                 else:
                     time.sleep(sleep)
+            else:
+                skipped += 1
 
     else:
         game_ids = parse_all_game_ids(raw_seasons_dir)
@@ -95,7 +103,12 @@ def refresh_games(
         for game_id in tqdm(game_ids):
             success = download_game_page(game_id, overwrite=overwrite)
             if success:
+                downloaded += 1
                 if sleep == "random":
                     time.sleep(random.uniform(0.2, 2.0))
                 else:
                     time.sleep(sleep)
+            else:
+                skipped += 1
+
+    file_logger.info(f"Downloaded {downloaded} games, skipped {skipped} games")

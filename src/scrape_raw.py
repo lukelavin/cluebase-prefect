@@ -1,4 +1,5 @@
 import os
+from logging import getLogger
 from typing import List
 
 from bs4 import BeautifulSoup
@@ -12,6 +13,8 @@ from src.paths import (
     RAW_SEASONS_DIR,
 )
 from src.urls import BASE_URL, GAME, LIST_SEASONS, SEASON
+
+file_logger = getLogger(__name__)
 
 
 def parse_season_urls(list_seasons_html: str) -> List[str]:
@@ -47,7 +50,9 @@ def parse_game_ids(season_page_html: str) -> List[str]:
 def parse_all_game_ids(season_page_dir=RAW_SEASONS_DIR):
     game_ids = []
     for season_file in os.listdir(season_page_dir):
-        print(f"Parsing game IDs from {os.path.join(season_page_dir, season_file)}")
+        file_logger.info(
+            f"Parsing game IDs from {os.path.join(season_page_dir, season_file)}"
+        )
         game_ids += parse_game_ids(os.path.join(season_page_dir, season_file))
 
     return game_ids
@@ -56,7 +61,7 @@ def parse_all_game_ids(season_page_dir=RAW_SEASONS_DIR):
 def parse_all_game_ids_from_s3(bucket, season_page_dir=RAW_SEASONS_DIR):
     game_ids = []
     for season_file in ls_s3(bucket.bucket_name, season_page_dir):
-        print(f"Parsing game IDs from {season_file}")
+        file_logger.info(f"Parsing game IDs from {season_file}")
         season_html = read_s3_object(bucket, season_file)
         game_ids += parse_game_ids(season_html)
 
@@ -71,7 +76,7 @@ def download_season_list(
 
     Includes urls to pages of all seasons. Effectively the root of the page tree.
     """
-    print("Downloading Season List page")
+    file_logger.info("Downloading Season List page")
     os.makedirs(target_dir, exist_ok=True)
 
     target_path = os.path.join(target_dir, target_filename)
@@ -85,7 +90,7 @@ def download_season_list_to_s3(bucket, target_path=RAW_LIST_SEASONS, overwrite=F
 
     Includes urls to pages of all seasons. Effectively the root of the page tree.
     """
-    print("Downloading Season List page")
+    file_logger.info("Downloading Season List page")
 
     return download_html_to_s3(
         BASE_URL + LIST_SEASONS, bucket, target_path, overwrite=overwrite

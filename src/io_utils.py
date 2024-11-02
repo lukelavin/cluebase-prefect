@@ -1,28 +1,31 @@
 import os
 from functools import cache
 from io import BytesIO
+from logging import getLogger
 
 import requests
 from prefect_aws import AwsCredentials, S3Bucket
 from pymongo import AsyncMongoClient
 
+file_logger = getLogger(__name__)
+
 
 def download_html(url, write_path, overwrite=False):
     if os.path.exists(write_path) and not overwrite:
-        print(f"{write_path} exists, skipping download")
+        file_logger.debug(f"{write_path} exists, skipping download")
         return False
 
     r = requests.get(url)
 
     if r.ok:
-        print(f"Writing to {write_path}")
+        file_logger.info(f"Writing to {write_path}")
         with open(write_path, "w+") as f:
             f.write(r.text)
 
         return True
     else:
-        print("Error {r.status_code} downloading page {url}")
-        print(r)
+        file_logger.error("Error {r.status_code} downloading page {url}")
+        file_logger.error(r)
         return False
 
 
@@ -82,19 +85,19 @@ def download_html_to_s3(
     url: str, bucket: S3Bucket, write_path: str, overwrite=False
 ) -> str:
     if object_exists(bucket, write_path) and not overwrite:
-        print(f"{write_path} exists, skipping download")
+        file_logger.debug(f"{write_path} exists, skipping download")
         return None
 
     r = requests.get(url)
 
     if r.ok:
-        print(f"Writing to {write_path}")
+        file_logger.info(f"Writing to {write_path}")
         path = upload_object(bucket, write_path, r.text)
 
         return path
     else:
-        print("Error {r.status_code} downloading page {url}")
-        print(r)
+        file_logger.error("Error {r.status_code} downloading page {url}")
+        file_logger.error(r)
         return None
 
 
