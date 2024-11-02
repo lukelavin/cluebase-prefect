@@ -4,6 +4,7 @@ import os
 import pymongo
 from prefect import flow, task
 from prefect.blocks.system import Secret
+from prefect_aws.s3 import S3Bucket
 from pymongo.database import Database
 from tqdm.asyncio import tqdm
 
@@ -11,6 +12,7 @@ from src.clues import parse_clues_from_game
 from src.io_utils import (
     get_db,
     get_mongo_client,
+    get_s3_bucket,
     insert_clue_bulk,
     ls_s3,
     ls_s3_async,
@@ -33,8 +35,8 @@ async def load_clues_from_game_file(game_file: str, db: Database):
 
 
 @task
-async def load_clues_from_game_file_s3(s3_path: str, db: Database):
-    game_html = await read_s3_object_async(s3_path)
+async def load_clues_from_game_file_s3(bucket: S3Bucket, s3_path: str, db: Database):
+    game_html = await read_s3_object_async(bucket, s3_path)
 
     game_id = s3_path.split("/")[-1].split(".")[0]
     print(f"Loading clues from game: {game_id}")
@@ -60,6 +62,8 @@ async def load_all_game_files_s3(
     games_dir: str = RAW_GAMES_DIR,
     mongo_secret_block: str = "mongo-connection-string",
 ):
+    bucket = get_s3_bucket(s3_bucket_name)
+
     mongo_conn_str = (await Secret.load(mongo_secret_block)).get()
     mongo_client = await get_mongo_client(mongo_conn_str)
     db = get_db(mongo_client)
@@ -69,7 +73,7 @@ async def load_all_game_files_s3(
     with tqdm(games) as progress:
         async for game_file in progress:
             try:
-                await load_clues_from_game_file_s3(game_file, db)
+                await load_clues_from_game_file_s3(bucket, game_file, db)
             except pymongo.errors.BulkWriteError as e:
                 print(e)
 
