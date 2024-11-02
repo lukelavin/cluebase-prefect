@@ -59,7 +59,7 @@ async def load_all_game_files_s3(
     games_dir: str = RAW_GAMES_DIR,
     mongo_secret_block: str = "mongo-connection-string",
 ):
-    mongo_conn_str = Secret.load(mongo_secret_block).get()
+    mongo_conn_str = (await Secret.load(mongo_secret_block)).get()
     mongo_client = await get_mongo_client(mongo_conn_str)
     db = get_db(mongo_client)
 
