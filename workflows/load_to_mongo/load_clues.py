@@ -1,6 +1,5 @@
 import asyncio
 import itertools
-import logging
 import os
 from logging import getLogger
 
@@ -8,6 +7,7 @@ import pymongo
 from prefect import flow, task
 from prefect.blocks.system import Secret
 from prefect.cache_policies import INPUTS
+from prefect.logging import get_logger, get_run_logger
 from prefect_aws.s3 import S3Bucket
 from pymongo.database import Database
 from tqdm.asyncio import tqdm
@@ -26,15 +26,16 @@ from src.io_utils import (
 )
 from src.paths import RAW_GAMES_DIR
 
-file_logger = logging.getLogger(__name__)
+file_logger = getLogger(__name__)
 
 
 @task(cache_policy=INPUTS - "db")
 async def load_clues_from_game_file(game_file: str, db: Database):
+    logger = get_run_logger()
     game_html = read_raw_file(os.path.join(RAW_GAMES_DIR, game_file))
 
     game_id = game_file.split(".")[0]
-    file_logger.debug(f"Loading clues from game: {game_id}")
+    logger.debug(f"Loading clues from game: {game_id}")
 
     clues = parse_clues_from_game(game_html, game_id)
 
@@ -48,25 +49,27 @@ async def load_clues_from_game_file_s3_task(
     return load_clues_from_game_file_s3(bucket, s3_path, db)
 
 
-async def load_clues_from_game_file_s3(bucket: S3Bucket, s3_path: str, db: Database):
+async def load_clues_from_game_file_s3(
+    bucket: S3Bucket, s3_path: str, db: Database, logger=get_logger()
+):
     game_html = await read_s3_object_async(bucket, s3_path)
 
     game_id = s3_path.split("/")[-1].split(".")[0]
-    file_logger.debug(f"Loading clues from game: {game_id}")
+    logger.debug(f"Loading clues from game: {game_id}")
 
     clues = parse_clues_from_game(game_html, game_id)
 
-    file_logger.debug(f"Attempting to load {len(clues)} clues into collection")
+    logger.debug(f"Attempting to load {len(clues)} clues into collection")
     try:
         loaded = await insert_clue_bulk(db, clues)
-        file_logger.debug(f"Loaded {loaded} clues from {s3_path}")
+        logger.debug(f"Loaded {loaded} clues from {s3_path}")
         return loaded
     except pymongo.errors.BulkWriteError as e:
         file_logger.warning(e)
         return []
 
 
-async def read_and_parse_clues(bucket, s3_path):
+async def read_and_parse_clues(bucket, s3_path, logger=get_logger()):
     game_html = await read_s3_object_async(bucket, s3_path)
 
     game_id = s3_path.split("/")[-1].split(".")[0]
@@ -82,7 +85,10 @@ async def load_clues_batch_s3(
     game_file_prefix: str = "",
     mongo_secret_block: str = "mongo-connection-string",
 ):
-    file_logger.info("Loading clues from all game files")
+    logger = get_run_logger()
+    logger.info(
+        f"Loading clues from s3:/{s3_bucket_name}/{games_dir}/{game_file_prefix}*"
+    )
 
     bucket = get_s3_bucket(s3_bucket_name)
 
@@ -91,22 +97,24 @@ async def load_clues_batch_s3(
     db = await get_db(mongo_client)
 
     game_paths = await ls_s3_prefix(bucket, games_dir, prefix=game_file_prefix)
+    logger.info(f"Found {len(game_paths)} games to load")
 
     clue_lists = await asyncio.gather(
-        *[read_and_parse_clues(bucket, s3_path) for s3_path in game_paths]
+        *[read_and_parse_clues(bucket, s3_path, logger) for s3_path in game_paths]
     )
 
     clues = list(itertools.chain.from_iterable(clue_lists))
+    logger.info(f"Clues parsed: {len(clues)}")
 
-    file_logger.debug(f"Attempting to load {len(clues)} clues into collection")
+    logger.info(f"Attempting to load clues into collection")
     try:
         loaded = await insert_clue_bulk(db, clues)
-        file_logger.debug(
+        logger.info(
             f"Loaded {loaded} clues from s3:/{s3_bucket_name}/{games_dir}/{game_file_prefix}*"
         )
         return loaded
     except pymongo.errors.BulkWriteError as e:
-        file_logger.warning(e)
+        logger.warning(e)
         return []
 
 
@@ -152,11 +160,11 @@ async def load_all_game_files_batched_s3(
     games_dir: str = RAW_GAMES_DIR,
     mongo_secret_block: str = "mongo-connection-string",
 ):
-    file_logger.info("Loading clues batched from all game files")
+    logger = get_run_logger()
+    logger.info("Loading clues batched from all game files")
 
     batch_runs = []
     for batch_prefix in range(1, 10):
-        file_logger.info("Loading file batch prefix: " + str(batch_prefix))
         batch_runs.append(
             load_clues_batch_s3.submit(
                 s3_bucket_name, games_dir, str(batch_prefix), mongo_secret_block
