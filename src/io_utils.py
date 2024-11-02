@@ -1,4 +1,5 @@
 import os
+from functools import cache
 from io import BytesIO
 
 import requests
@@ -67,7 +68,8 @@ def get_s3_bucket(
 
 
 def object_exists(bucket: S3Bucket, path: str) -> bool:
-    return bool(bucket.list_objects(path))
+    return path in ls_s3(bucket, path.split("/")[:-1])
+    # return bool(bucket.list_objects(path))
 
 
 def upload_object(bucket: S3Bucket, path: str, content: str) -> str:
@@ -100,6 +102,7 @@ def read_s3_object(bucket: S3Bucket, path: str) -> str:
     return bucket.read_path(path)
 
 
+@cache()
 def ls_s3(bucket: S3Bucket, path: str) -> str:
     response = bucket.list_objects(path)
 

@@ -3,7 +3,7 @@ from typing import List
 
 from bs4 import BeautifulSoup
 
-from src.io_utils import download_html, download_html_to_s3, ls_s3
+from src.io_utils import download_html, download_html_to_s3, ls_s3, read_s3_object
 from src.paths import (
     RAW_DIR,
     RAW_GAMES_DIR,
@@ -57,7 +57,8 @@ def parse_all_game_ids_from_s3(bucket, season_page_dir=RAW_SEASONS_DIR):
     game_ids = []
     for season_file in ls_s3(bucket, season_page_dir):
         print(f"Parsing game IDs from {season_file}")
-        game_ids += parse_game_ids(season_file)
+        season_html = read_s3_object(bucket, season_file)
+        game_ids += parse_game_ids(season_html)
 
     return game_ids
 
