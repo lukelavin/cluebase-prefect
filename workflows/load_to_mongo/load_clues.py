@@ -82,7 +82,7 @@ async def load_all_game_files_s3(
     with tqdm(games) as progress:
         async for game_file in progress:
             try:
-                await load_clues_from_game_file_s3(bucket, game_file, db)
+                load_clues_from_game_file_s3.submit(bucket, game_file, db)
             except pymongo.errors.BulkWriteError as e:
                 file_logger.warn(e)
 
