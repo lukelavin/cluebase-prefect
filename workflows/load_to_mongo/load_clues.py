@@ -91,9 +91,7 @@ async def load_all_game_files_s3(
 
 
 @flow
-async def load_clues_from_all_games_s3(
-    s3_bucket_name="cluebase", s3_games_path="raw/games"
-):
+def load_clues_from_all_games_s3(s3_bucket_name="cluebase", s3_games_path="raw/games"):
     asyncio.run(load_all_game_files_s3(s3_bucket_name, s3_games_path))
 
 
