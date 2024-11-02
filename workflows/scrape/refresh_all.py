@@ -5,12 +5,15 @@ from workflows.scrape.shared import refresh_games, refresh_season_list, refresh_
 
 
 @flow(log_prints=True)
-def refresh_all(overwrite: bool = False):
-    refresh_season_list(overwrite=True)
+def refresh_all(bucket_name="cluebase", overwrite: bool = False):
+    if bucket_name:
+        print("Refreshing files in bucket: {cluebase}")
 
-    refresh_seasons(overwrite=True)
+    refresh_season_list(bucket_name)
 
-    refresh_games(overwrite=overwrite)
+    refresh_seasons(bucket_name)
+
+    refresh_games(bucket_name, overwrite=overwrite)
 
 
 # if __name__ == "__main__":
