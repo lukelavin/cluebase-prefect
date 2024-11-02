@@ -48,7 +48,7 @@ async def load_clues_from_game_file_s3(bucket: S3Bucket, s3_path: str, db: Datab
     clues = parse_clues_from_game(game_html, game_id)
 
     file_logger.debug(f"Attempting to load {len(clues)} clues into collection")
-    await insert_clue_bulk(db, clues)
+    return await insert_clue_bulk(db, clues)
 
 
 @task
@@ -82,7 +82,9 @@ async def load_all_game_files_s3(
     with tqdm(games) as progress:
         async for game_file in progress:
             try:
-                load_clues_from_game_file_s3.submit(bucket, game_file, db)
+                future = load_clues_from_game_file_s3.submit(bucket, game_file, db)
+                loaded = future.result()
+                file_logger.debug(f"Loaded {loaded} clues from {game_file}")
             except pymongo.errors.BulkWriteError as e:
                 file_logger.warn(e)
 
