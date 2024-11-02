@@ -80,7 +80,7 @@ async def load_clues_batch_s3(
     mongo_client = await get_mongo_client(mongo_conn_str)
     db = await get_db(mongo_client)
 
-    game_paths = await ls_s3(s3_bucket_name, games_dir)
+    game_paths = await ls_s3_prefix(s3_bucket_name, games_dir, prefix=game_file_prefix)
 
     clues = []
     async for s3_path in game_paths:
