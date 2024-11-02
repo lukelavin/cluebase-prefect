@@ -4,3 +4,6 @@ raw
 metadata
 .isort.cfg
 load_logs
+.*
+
+!/.gitignore

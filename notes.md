@@ -126,7 +126,11 @@ Alex ()
 - Let mongo catch duplicates by making this compound id the `_id` field.
 
 
+# Automation steps
 
+simplify workflow so it's broken down into steps that are simple function calls
+
+move from local file storage to s3 (this won't be automated on my own device, so needs to exist somewhere else)
 
 ### Prefect steps
 
@@ -138,3 +142,4 @@ Create flows/tasks
 
 Run flow to test
 
+configure prefect AWS credentials block in UI (easier than creating w/ script because of handling secrets)

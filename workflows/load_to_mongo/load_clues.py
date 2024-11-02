@@ -5,8 +5,8 @@ import pymongo
 from tqdm.asyncio import tqdm
 
 from src.clues import parse_clues_from_game
+from src.io_utils import insert_clue_bulk
 from src.paths import RAW_GAMES_DIR
-from src.utils import insert_clue_bulk
 
 
 async def load_clues_from_game_file(game_file):

@@ -2,5 +2,5 @@ requests
 beautifulsoup4
 tqdm
 pymongo
-prefect
+prefect[aws]
 prefect-github

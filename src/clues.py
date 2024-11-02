@@ -4,8 +4,8 @@ from datetime import datetime
 
 from bs4 import BeautifulSoup
 
+from src.io_utils import read_raw_file
 from src.paths import RAW_GAMES_DIR
-from src.utils import read_raw_file
 
 
 def clue_quality_pass(clues):
