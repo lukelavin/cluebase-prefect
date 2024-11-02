@@ -227,9 +227,8 @@ def parse_air_date(soup):
     return air_date
 
 
-def parse_clues_from_game(game_id):
-    raw_html = read_raw_file(os.path.join(RAW_GAMES_DIR, f"{game_id}.html"))
-    soup = BeautifulSoup(raw_html, "html.parser")
+def parse_clues_from_game(game_html, game_id):
+    soup = BeautifulSoup(game_html, "html.parser")
 
     air_date = parse_air_date(soup)
 

@@ -1,11 +1,13 @@
+import asyncio
 import os
-from functools import cache
+from functools import cache, partial
 from io import BytesIO
 from logging import getLogger
 
 import requests
 from prefect_aws import AwsCredentials, S3Bucket
 from pymongo import AsyncMongoClient
+from pymongo.database import Database
 
 file_logger = getLogger(__name__)
 
@@ -43,16 +45,21 @@ def print_to_file(content, file_path="test.html"):
 # Mongo helpers
 # *****************************************************
 
-client = AsyncMongoClient("mongodb://localhost:27017/")
-db = client.cluebase
+
+async def get_mongo_client(connection_string: str = "mongodb://localhost:27017/"):
+    return AsyncMongoClient(connection_string)
 
 
-async def insert_clue(clue_dict):
+async def get_db(client: AsyncMongoClient, db_name: str = "cluebase") -> Database:
+    return client.get_database(db_name)
+
+
+async def insert_clue(db, clue_dict):
     result = await db.clues.insert_one(clue_dict)
     return result.inserted_id
 
 
-async def insert_clue_bulk(clue_list):
+async def insert_clue_bulk(db, clue_list):
     result = await db.clues.insert_many(clue_list)
     return result.inserted_ids
 
@@ -103,6 +110,14 @@ def download_html_to_s3(
 
 def read_s3_object(bucket: S3Bucket, path: str) -> str:
     return bucket.read_path(path)
+
+
+async def read_s3_object_async(bucket: S3Bucket, path: str) -> str:
+    loop = asyncio.get_event_loop()
+
+    read_object_partial = partial(bucket.read_path, path)
+
+    return await loop.run_in_executor(None, read_object_partial)
 
 
 @cache
