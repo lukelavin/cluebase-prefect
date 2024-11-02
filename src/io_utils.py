@@ -160,4 +160,5 @@ async def ls_s3_prefix(
 
     file_logger.info(f"Listing objects in bucket {bucket_path}.")
     objects = await run_sync_in_worker_thread(bucket._list_objects_sync, page_iterator)
-    return objects
+
+    return tuple(s3_object["Key"] for s3_object in objects)
