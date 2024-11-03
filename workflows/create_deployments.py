@@ -45,3 +45,13 @@ if __name__ == "__main__":
         cron="0 5 * * *",
         job_variables={"pip_packages": pip_packages},
     )
+
+    flow.from_source(
+        source=github_repo,
+        entrypoint="workflows/load_to_mongo/load_clues.py:load_clues_from_all_games_s3",
+    ).deploy(
+        name="load-all-clues-main",
+        work_pool_name="my-work-pool",
+        cron="0 5 * * *",
+        job_variables={"pip_packages": pip_packages},
+    )
