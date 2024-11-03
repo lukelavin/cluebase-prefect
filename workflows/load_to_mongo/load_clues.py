@@ -110,8 +110,9 @@ async def load_clues_batch_s3(
     try:
         loaded = await insert_clue_bulk(db, clues)
         logger.info(
-            f"Loaded {loaded} clues from s3:/{s3_bucket_name}/{games_dir}/{game_file_prefix}*"
+            f"Loaded {len(loaded)} clues from s3:/{s3_bucket_name}/{games_dir}/{game_file_prefix}*"
         )
+        logger.info(loaded)
         return loaded
     except pymongo.errors.BulkWriteError as e:
         logger.warning(e)

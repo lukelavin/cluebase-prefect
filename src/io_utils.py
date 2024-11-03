@@ -62,7 +62,7 @@ async def insert_clue(db, clue_dict):
 
 
 async def insert_clue_bulk(db, clue_list):
-    result = await db.clues.insert_many(clue_list)
+    result = await db.clues.insert_many(clue_list, ordered=False)
     return result.inserted_ids
 
 
