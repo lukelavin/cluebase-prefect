@@ -106,7 +106,7 @@ def download_html_to_s3(
         return path
     else:
         logger.error("Error {r.status_code} downloading page {url}")
-        loger.error(r)
+        logger.error(r)
         return None
 
 
