@@ -13,7 +13,6 @@ from src.io_utils import (
     get_mongo_client,
     get_s3_bucket,
     insert_clue_bulk,
-    ls_s3_prefix,
     read_s3_object_async,
 )
 from src.paths import RAW_GAMES_DIR
@@ -65,7 +64,7 @@ async def load_game_file_s3(
 
 
 @flow
-def load_clues_from_single_games_s3(
+def load_clues_from_single_game_s3(
     game_id: str,
     s3_bucket_name="cluebase",
     s3_games_path="raw/games",
