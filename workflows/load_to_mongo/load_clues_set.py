@@ -1,6 +1,7 @@
 import asyncio
 import os
 from logging import getLogger
+from typing import List
 
 import pymongo
 from prefect import flow, task
@@ -64,9 +65,16 @@ async def load_game_file_s3(
 
 
 @flow
-def load_clues_from_single_game_s3(
-    game_id: str,
+def load_clues_from_set_s3(
+    game_ids: List[str],
     s3_bucket_name="cluebase",
     s3_games_path="raw/games",
 ):
-    asyncio.run(load_game_file_s3(game_id, s3_bucket_name, s3_games_path))
+    asyncio.run(
+        asyncio.gather(
+            *[
+                load_game_file_s3(game_id, s3_bucket_name, s3_games_path)
+                for game_id in game_ids
+            ]
+        )
+    )

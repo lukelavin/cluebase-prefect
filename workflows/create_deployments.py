@@ -42,7 +42,6 @@ if __name__ == "__main__":
     ).deploy(
         name="load-all-clues-main",
         work_pool_name="my-work-pool",
-        cron="0 5 * * *",
         job_variables={"pip_packages": pip_packages},
     )
 
@@ -52,7 +51,6 @@ if __name__ == "__main__":
     ).deploy(
         name="load-all-clues-main",
         work_pool_name="my-work-pool",
-        cron="0 5 * * *",
         job_variables={"pip_packages": pip_packages},
     )
 
@@ -62,5 +60,15 @@ if __name__ == "__main__":
     ).deploy(
         name="load-clues-single-game-main",
         work_pool_name="my-work-pool",
+        job_variables={"pip_packages": pip_packages},
+    )
+
+    flow.from_source(
+        source=github_repo,
+        entrypoint="workflows/parse_load_latest_season.py:parse_and_load_latest_season",
+    ).deploy(
+        name="parse-load-latest-season-main",
+        work_pool_name="my-work-pool",
+        cron="0 2 * * *",
         job_variables={"pip_packages": pip_packages},
     )

@@ -104,6 +104,7 @@ def refresh_games(
             skipped += 1
 
     logger.info(f"Downloaded {downloaded} games, skipped {skipped} games")
+    return game_ids
 
 
 @task

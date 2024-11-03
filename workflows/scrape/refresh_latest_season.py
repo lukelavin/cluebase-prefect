@@ -18,9 +18,11 @@ def refresh_latest_season(bucket_name="cluebase", overwrite: bool = True):
 
     latest_season = download_latest_season(bucket_name)
 
-    refresh_games(
+    game_ids = refresh_games(
         latest_season, bucket_name, overwrite=overwrite, logger=prefect_logger
     )
+
+    return game_ids
 
 
 @task
