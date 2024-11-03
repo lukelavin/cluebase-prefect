@@ -1,8 +1,10 @@
 from prefect import flow, task
 from prefect.logging import get_run_logger
 
-from src.scrape_raw import download_season_list
-from workflows.scrape.shared import refresh_games, refresh_season_list, refresh_seasons
+from src.io_utils import get_s3_bucket, read_s3_object
+from src.paths import RAW_LIST_SEASONS
+from src.scrape_raw import download_season_page_to_s3, parse_season_ids
+from workflows.scrape.shared import refresh_games, refresh_season_list
 
 
 @flow
@@ -14,6 +16,21 @@ def refresh_latest_season(bucket_name="cluebase", overwrite: bool = True):
 
     refresh_season_list(bucket_name, overwrite=True, logger=prefect_logger)
 
-    refresh_seasons(bucket_name, overwrite=True, logger=prefect_logger)
+    latest_season = download_latest_season(bucket_name)
 
-    refresh_games(bucket_name, overwrite=overwrite, logger=prefect_logger)
+    refresh_games(
+        latest_season, bucket_name, overwrite=overwrite, logger=prefect_logger
+    )
+
+
+@task
+def download_latest_season(bucket_name="cluebase", list_seasons_path=RAW_LIST_SEASONS):
+    prefect_logger = get_run_logger()
+
+    bucket = get_s3_bucket(bucket_name)
+    list_seasons_html = read_s3_object(bucket, list_seasons_path)
+    recent_season_id = parse_season_ids(list_seasons_html)[0]
+
+    prefect_logger.info(f"Downloading latest season: {recent_season_id}")
+
+    return download_season_page_to_s3(recent_season_id, bucket, overwrite=True)

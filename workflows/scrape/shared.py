@@ -16,6 +16,7 @@ from src.scrape_raw import (
     download_season_page_to_s3,
     parse_all_game_ids,
     parse_all_game_ids_from_s3,
+    parse_game_ids,
     parse_season_ids,
 )
 
@@ -36,7 +37,7 @@ def refresh_season_list(s3_bucket_name="cluebase", overwrite=True, logger=file_l
 
 
 @task
-def refresh_seasons(
+def refresh_all_seasons(
     s3_bucket_name="cluebase",
     overwrite=True,
     sleep="random",
@@ -75,6 +76,35 @@ def refresh_seasons(
 
 @task
 def refresh_games(
+    season_id, s3_bucket_name="cluebase", overwrite=False, logger=file_logger
+):
+
+    bucket = get_s3_bucket(bucket_name=s3_bucket_name)
+
+    season_html = read_s3_object(bucket, f"{RAW_SEASONS_DIR}/{season_id}.html")
+
+    game_ids = parse_game_ids(season_html)
+
+    logger.info(f"Parsed {len(game_ids)} game ids for season {season_id}")
+    logger.debug(game_ids)
+
+    skipped = 0
+    downloaded = 0
+    for game_id in tqdm(game_ids):
+        success = download_game_page_to_s3(
+            game_id, bucket, overwrite=overwrite, logger=logger
+        )
+        if success:
+            downloaded += 1
+            time.sleep(random.uniform(0.2, 2.0))
+        else:
+            skipped += 1
+
+    logger.info(f"Downloaded {downloaded} games, skipped {skipped} games")
+
+
+@task
+def refresh_all_games(
     s3_bucket_name="cluebase",
     overwrite=False,
     sleep="random",
