@@ -45,6 +45,7 @@ async def load_game_file_s3(
     bucket = get_s3_bucket(s3_bucket_name)
 
     clues = await read_and_parse_clues(bucket, game_file_path, logger)
+    logger.info(f"Parsed {len(clues)} clues from {game_file_path}")
 
     logger.info(f"Getting Mongo connection using secret block {mongo_secret_block}")
     mongo_conn_str = (await Secret.load(mongo_secret_block)).get()
