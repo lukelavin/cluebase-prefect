@@ -195,5 +195,5 @@ def download_game_page_to_s3(
         bucket,
         target_path,
         overwrite=overwrite,
-        logger=prefect_logger,
+        logger=logger,
     )
