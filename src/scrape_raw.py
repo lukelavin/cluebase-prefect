@@ -58,10 +58,12 @@ def parse_all_game_ids(season_page_dir=RAW_SEASONS_DIR):
     return game_ids
 
 
-def parse_all_game_ids_from_s3(bucket, season_page_dir=RAW_SEASONS_DIR):
+def parse_all_game_ids_from_s3(
+    bucket, season_page_dir=RAW_SEASONS_DIR, logger=file_logger
+):
     game_ids = []
     for season_file in ls_s3(bucket.bucket_name, season_page_dir):
-        file_logger.info(f"Parsing game IDs from {season_file}")
+        logger.info(f"Parsing game IDs from {season_file}")
         season_html = read_s3_object(bucket, season_file)
         game_ids += parse_game_ids(season_html)
 
@@ -69,14 +71,17 @@ def parse_all_game_ids_from_s3(bucket, season_page_dir=RAW_SEASONS_DIR):
 
 
 def download_season_list(
-    target_dir=RAW_DIR, target_filename=RAW_LIST_SEASONS_NAME, overwrite=False
+    target_dir=RAW_DIR,
+    target_filename=RAW_LIST_SEASONS_NAME,
+    overwrite=False,
+    logger=file_logger,
 ):
     """
     Download Season List page.
 
     Includes urls to pages of all seasons. Effectively the root of the page tree.
     """
-    file_logger.info("Downloading Season List page")
+    logger.info("Downloading Season List page")
     os.makedirs(target_dir, exist_ok=True)
 
     target_path = os.path.join(target_dir, target_filename)
@@ -84,13 +89,15 @@ def download_season_list(
     return download_html(BASE_URL + LIST_SEASONS, target_path, overwrite=overwrite)
 
 
-def download_season_list_to_s3(bucket, target_path=RAW_LIST_SEASONS, overwrite=False):
+def download_season_list_to_s3(
+    bucket, target_path=RAW_LIST_SEASONS, overwrite=False, logger=file_logger
+):
     """
     Download Season List page to s3 bucket.
 
     Includes urls to pages of all seasons. Effectively the root of the page tree.
     """
-    file_logger.info("Downloading Season List page")
+    logger.info("Downloading Season List page")
 
     return download_html_to_s3(
         BASE_URL + LIST_SEASONS, bucket, target_path, overwrite=overwrite
@@ -139,7 +146,11 @@ def download_season_page_to_s3(
 
 
 def download_game_page(
-    game_id, target_dir=RAW_GAMES_DIR, target_filename=None, overwrite=False
+    game_id,
+    target_dir=RAW_GAMES_DIR,
+    target_filename=None,
+    overwrite=False,
+    logger=file_logger,
 ):
     """
     Download Game page.
@@ -154,11 +165,18 @@ def download_game_page(
         else os.path.join(target_dir, f"{game_id}.html")
     )
 
-    return download_html(f"{BASE_URL}{GAME}{game_id}", target_path, overwrite=overwrite)
+    return download_html(
+        f"{BASE_URL}{GAME}{game_id}", target_path, overwrite=overwrite, logger=logger
+    )
 
 
 def download_game_page_to_s3(
-    game_id, bucket, target_dir=RAW_GAMES_DIR, target_filename=None, overwrite=False
+    game_id,
+    bucket,
+    target_dir=RAW_GAMES_DIR,
+    target_filename=None,
+    overwrite=False,
+    logger=file_logger,
 ):
     """
     Download Game page to s3 bucket.
@@ -173,5 +191,9 @@ def download_game_page_to_s3(
     )
 
     return download_html_to_s3(
-        f"{BASE_URL}{GAME}{game_id}", bucket, target_path, overwrite=overwrite
+        f"{BASE_URL}{GAME}{game_id}",
+        bucket,
+        target_path,
+        overwrite=overwrite,
+        logger=prefect_logger,
     )

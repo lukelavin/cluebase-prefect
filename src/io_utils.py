@@ -14,31 +14,31 @@ from pymongo.database import Database
 file_logger = getLogger(__name__)
 
 
-def download_html(url, write_path, overwrite=False):
+def download_html(url, write_path, overwrite=False, logger=file_logger):
     if os.path.exists(write_path) and not overwrite:
-        file_logger.debug(f"{write_path} exists, skipping download")
+        logger.debug(f"{write_path} exists, skipping download")
         return False
 
     r = requests.get(url)
 
     if r.ok:
-        file_logger.info(f"Writing to {write_path}")
+        logger.info(f"Writing to {write_path}")
         with open(write_path, "w+") as f:
             f.write(r.text)
 
         return True
     else:
-        file_logger.error("Error {r.status_code} downloading page {url}")
-        file_logger.error(r)
+        logger.error("Error {r.status_code} downloading page {url}")
+        logger.error(r)
         return False
 
 
-def read_raw_file(file_path):
+def read_raw_file(file_path, logger=file_logger):
     with open(file_path, "r") as f:
         return f.read()
 
 
-def print_to_file(content, file_path="test.html"):
+def print_to_file(content, file_path="test.html", logger=file_logger):
     with open(file_path, "w+") as f:
         f.write(str(content))
 
@@ -91,7 +91,7 @@ def upload_object(bucket: S3Bucket, path: str, content: str) -> str:
 
 
 def download_html_to_s3(
-    url: str, bucket: S3Bucket, write_path: str, overwrite=False
+    url: str, bucket: S3Bucket, write_path: str, overwrite=False, logger=file_logger
 ) -> str:
     if object_exists(bucket, write_path) and not overwrite:
         file_logger.debug(f"{write_path} exists, skipping download")
@@ -130,13 +130,6 @@ def ls_s3(bucket_name: str, path: str) -> str:
     return tuple(s3_object["Key"] for s3_object in response)
 
 
-async def ls_s3_async(bucket_name: str, path: str) -> str:
-    bucket = get_s3_bucket(bucket_name)
-    response = await bucket.list_objects(path)
-
-    return tuple(s3_object["Key"] for s3_object in response)
-
-
 async def ls_s3_prefix(
     bucket: S3Bucket,
     folder: str = "",
@@ -145,6 +138,7 @@ async def ls_s3_prefix(
     page_size: Optional[int] = None,
     max_items: Optional[int] = None,
     jmespath_query: Optional[str] = None,
+    logger=file_logger,
 ) -> List[Dict[str, Any]]:
     bucket_path = bucket._join_bucket_folder(folder) + "/" + prefix
     client = bucket.credentials.get_s3_client()
@@ -158,7 +152,7 @@ async def ls_s3_prefix(
     if jmespath_query:
         page_iterator = page_iterator.search(f"{jmespath_query} | {{Contents: @}}")
 
-    file_logger.info(f"Listing objects in bucket {bucket_path}.")
+    logger.info(f"Listing objects in bucket {bucket_path}.")
     objects = await run_sync_in_worker_thread(bucket._list_objects_sync, page_iterator)
 
     return tuple(s3_object["Key"] for s3_object in objects)

@@ -26,7 +26,7 @@ file_logger = getLogger(__name__)
 
 
 @task
-def refresh_season_list(s3_bucket_name="cluebase", overwrite=True):
+def refresh_season_list(s3_bucket_name="cluebase", overwrite=True, logger=file_logger):
     if s3_bucket_name:
         bucket = get_s3_bucket(s3_bucket_name)
 
@@ -41,6 +41,7 @@ def refresh_seasons(
     overwrite=True,
     sleep="random",
     list_seasons_file=RAW_LIST_SEASONS,
+    logger=file_logger,
 ):
     if s3_bucket_name:
         bucket = get_s3_bucket(s3_bucket_name)
@@ -78,13 +79,15 @@ def refresh_games(
     overwrite=False,
     sleep="random",
     raw_seasons_dir=RAW_SEASONS_DIR,
+    logger=file_logger,
 ):
     skipped = 0
     downloaded = 0
+
     if s3_bucket_name:
         bucket = get_s3_bucket(s3_bucket_name)
 
-        game_ids = parse_all_game_ids_from_s3(bucket, raw_seasons_dir)
+        game_ids = parse_all_game_ids_from_s3(bucket, raw_seasons_dir, logger=logger)
 
         for game_id in tqdm(game_ids):
             success = download_game_page_to_s3(game_id, bucket, overwrite=overwrite)
@@ -98,10 +101,10 @@ def refresh_games(
                 skipped += 1
 
     else:
-        game_ids = parse_all_game_ids(raw_seasons_dir)
+        game_ids = parse_all_game_ids(raw_seasons_dir, logger=logger)
 
         for game_id in tqdm(game_ids):
-            success = download_game_page(game_id, overwrite=overwrite)
+            success = download_game_page(game_id, overwrite=overwrite, logger=logger)
             if success:
                 downloaded += 1
                 if sleep == "random":
@@ -111,4 +114,4 @@ def refresh_games(
             else:
                 skipped += 1
 
-    file_logger.info(f"Downloaded {downloaded} games, skipped {skipped} games")
+    logger.info(f"Downloaded {downloaded} games, skipped {skipped} games")
