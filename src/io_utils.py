@@ -94,19 +94,19 @@ def download_html_to_s3(
     url: str, bucket: S3Bucket, write_path: str, overwrite=False, logger=file_logger
 ) -> str:
     if object_exists(bucket, write_path) and not overwrite:
-        file_logger.debug(f"{write_path} exists, skipping download")
+        logger.debug(f"{write_path} exists, skipping download")
         return None
 
     r = requests.get(url)
 
     if r.ok:
-        file_logger.info(f"Writing to {write_path}")
+        logger.info(f"Writing to {write_path}")
         path = upload_object(bucket, write_path, r.text)
 
         return path
     else:
-        file_logger.error("Error {r.status_code} downloading page {url}")
-        file_logger.error(r)
+        logger.error("Error {r.status_code} downloading page {url}")
+        loger.error(r)
         return None
 
 

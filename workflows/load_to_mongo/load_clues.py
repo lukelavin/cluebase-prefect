@@ -25,7 +25,7 @@ async def read_and_parse_clues(bucket, s3_path, logger=get_logger()):
     game_html = await read_s3_object_async(bucket, s3_path)
 
     game_id = s3_path.split("/")[-1].split(".")[0]
-    file_logger.debug(f"Loading clues from game: {game_id}")
+    logger.debug(f"Loading clues from game: {game_id}")
 
     return parse_clues_from_game(game_html, game_id)
 
