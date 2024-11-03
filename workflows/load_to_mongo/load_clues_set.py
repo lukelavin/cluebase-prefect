@@ -64,17 +64,22 @@ async def load_game_file_s3(
         return e.details["writeErrors"]
 
 
+@task
+async def gather_load_tasks(
+    game_ids: List[str], s3_bucket_name: str, s3_games_path: str
+):
+    return await asyncio.gather(
+        *[
+            load_game_file_s3(game_id, s3_bucket_name, s3_games_path)
+            for game_id in game_ids
+        ]
+    )
+
+
 @flow
 def load_clues_from_set_s3(
     game_ids: List[str],
     s3_bucket_name="cluebase",
     s3_games_path="raw/games",
 ):
-    asyncio.run(
-        asyncio.gather(
-            *[
-                load_game_file_s3(game_id, s3_bucket_name, s3_games_path)
-                for game_id in game_ids
-            ]
-        )
-    )
+    asyncio.run(gather_load_tasks(game_ids, s3_bucket_name, s3_games_path))
