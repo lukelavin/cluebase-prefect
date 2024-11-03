@@ -81,7 +81,10 @@ def refresh_games(
 
     bucket = get_s3_bucket(bucket_name=s3_bucket_name)
 
-    season_html = read_s3_object(bucket, f"{RAW_SEASONS_DIR}/{season_id}.html")
+    season_s3_path = f"{RAW_SEASONS_DIR}/{season_id}.html"
+    logger.info(f"Reading {season_s3_path}")
+
+    season_html = read_s3_object(bucket, season_s3_path)
 
     game_ids = parse_game_ids(season_html)
 
