@@ -68,8 +68,11 @@ async def load_clues_batch_s3(
         logger.info(loaded)
         return loaded
     except pymongo.errors.BulkWriteError as e:
+        logger.info(
+            f"Loaded {e.details['nInserted']} clues from s3:/{s3_bucket_name}/{games_dir}/{game_file_prefix}*"
+        )
         logger.warning(e)
-        return []
+        return e.details["writeErrors"]
 
 
 @task
