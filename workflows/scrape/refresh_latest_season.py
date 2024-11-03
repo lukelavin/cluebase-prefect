@@ -33,4 +33,6 @@ def download_latest_season(bucket_name="cluebase", list_seasons_path=RAW_LIST_SE
 
     prefect_logger.info(f"Downloading latest season: {recent_season_id}")
 
-    return download_season_page_to_s3(recent_season_id, bucket, overwrite=True)
+    download_season_page_to_s3(recent_season_id, bucket, overwrite=True)
+
+    return recent_season_id
