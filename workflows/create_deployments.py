@@ -21,7 +21,7 @@ if __name__ == "__main__":
     flow.from_source(
         source=github_repo, entrypoint="workflows/scrape/refresh_all.py:refresh_all"
     ).deploy(
-        name="refresh-all-github",
+        name="refresh-all-main",
         work_pool_name="my-work-pool",
         job_variables={"pip_packages": pip_packages},
     )
@@ -30,7 +30,7 @@ if __name__ == "__main__":
         source=github_repo,
         entrypoint="workflows/scrape/refresh_latest_season.py:refresh_latest_season",
     ).deploy(
-        name="refresh-latest-season-github",
+        name="refresh-latest-season-main",
         work_pool_name="my-work-pool",
         cron="0 2 * * *",
         job_variables={"pip_packages": pip_packages},
@@ -40,7 +40,7 @@ if __name__ == "__main__":
         source=github_repo,
         entrypoint="workflows/load_to_mongo/load_clues.py:load_clues_from_all_games_s3",
     ).deploy(
-        name="load-all-clues-github",
+        name="load-all-clues-main",
         work_pool_name="my-work-pool",
         cron="0 5 * * *",
         job_variables={"pip_packages": pip_packages},
