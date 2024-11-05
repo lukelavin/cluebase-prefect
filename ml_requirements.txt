@@ -1,0 +1,8 @@
+pymongo
+prefect[aws]
+prefect-github
+faiss-cpu
+usearch
+datasets
+pandas
+sentence-transformers

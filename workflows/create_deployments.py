@@ -18,6 +18,10 @@ if __name__ == "__main__":
     with open("requirements.txt", "r") as f:
         pip_packages = f.read().splitlines()
 
+    ml_pip_packages = []
+    with open("ml_requirements.txt", "r") as f:
+        ml_pip_packages = f.read().splitlines()
+
     flow.from_source(
         source=github_repo, entrypoint="workflows/scrape/refresh_all.py:refresh_all"
     ).deploy(
@@ -31,16 +35,6 @@ if __name__ == "__main__":
         entrypoint="workflows/scrape/refresh_latest_season.py:refresh_latest_season",
     ).deploy(
         name="refresh-latest-season-main",
-        work_pool_name="my-work-pool",
-        cron="0 2 * * *",
-        job_variables={"pip_packages": pip_packages},
-    )
-
-    flow.from_source(
-        source=github_repo,
-        entrypoint="workflows/load_to_mongo/load_clues.py:load_clues_from_all_games_s3",
-    ).deploy(
-        name="load-all-clues-main",
         work_pool_name="my-work-pool",
         job_variables={"pip_packages": pip_packages},
     )
@@ -71,4 +65,13 @@ if __name__ == "__main__":
         work_pool_name="my-work-pool",
         cron="0 2 * * *",
         job_variables={"pip_packages": pip_packages},
+    )
+
+    flow.from_source(
+        source=github_repo,
+        entrypoint="workflows/ml_features/add_relevant_links.py:add_relevant_links",
+    ).deploy(
+        name="add-relevant-links-season-main",
+        work_pool_name="my-work-pool",
+        job_variables={"pip_packages": ml_pip_packages},
     )

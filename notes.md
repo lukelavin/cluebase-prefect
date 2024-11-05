@@ -126,6 +126,16 @@ Alex ()
 - Let mongo catch duplicates by making this compound id the `_id` field.
 
 
+
+# Plan scraping
+ - implement local
+# Plan load
+ - implement local
+# Automate data processes with Prefect, S3, and Atlas
+ - explain prefect and why I chose it
+ - explain how to build flows in prefect
+ - explain what I changed to fit local data process into cloud based prefect flows
+
 # Automation steps
 
 simplify workflow so it's broken down into steps that are simple function calls
@@ -149,4 +159,11 @@ configure prefect AWS credentials block in UI (easier than creating w/ script be
 moving to s3
 
 pip packages and no logs
+
+### Mongo trouble
+
+random clues
+
+indexing for category filters / future categories down the line
+
 
