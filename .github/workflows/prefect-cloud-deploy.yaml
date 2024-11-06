@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - "workflows/create-deployments.py"
+      - ".github/workflows/prefect-cloud-deploy.yaml"
 jobs:
   deploy_flow:
     runs-on: ubuntu-latest
