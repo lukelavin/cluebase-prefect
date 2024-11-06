@@ -25,4 +25,4 @@ jobs:
 
       - name: Run Create Deployments script
         run: |
-          python workflows/create-deployments.py
+          python workflows/create_deployments.py
