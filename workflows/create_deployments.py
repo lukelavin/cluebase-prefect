@@ -64,7 +64,7 @@ if __name__ == "__main__":
         name="parse-load-latest-season-main",
         work_pool_name="my-work-pool",
         cron="0 2 * * *",
-        job_variables={"pip_packages": pip_packages},
+        job_variables={"pip_packages": pip_packages + ml_pip_packages},
     )
 
     flow.from_source(
@@ -72,6 +72,15 @@ if __name__ == "__main__":
         entrypoint="workflows/ml_features/add_relevant_links.py:add_relevant_links",
     ).deploy(
         name="add-relevant-links-season-main",
+        work_pool_name="my-work-pool",
+        job_variables={"pip_packages": ml_pip_packages},
+    )
+
+    flow.from_source(
+        source=github_repo,
+        entrypoint="workflows/ml_features/classify_domain.py:classify_domains",
+    ).deploy(
+        name="classify-domains-main",
         work_pool_name="my-work-pool",
         job_variables={"pip_packages": ml_pip_packages},
     )

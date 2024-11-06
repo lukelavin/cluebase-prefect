@@ -73,9 +73,9 @@ def load_model_and_indices():
     )
 
     # Load the int8 and binary indices. Int8 is loaded as a view to save memory, as we never actually perform search with it.
-    int8_view = Index.restore("wikipedia_int8_usearch_50m.index", view=True)
+    int8_view = Index.restore("wikipedia_int8_usearch_1m.index", view=True)
     binary_index: faiss.IndexBinaryFlat = faiss.read_index_binary(
-        "wikipedia_ubinary_faiss_50m.index"
+        "wikipedia_ubinary_faiss_1m.index"
     )
     return title_text_dataset, model, int8_view, binary_index
 
@@ -149,3 +149,7 @@ def search(
         "Sort Time": f"{sort_time:.4f} s",
         "Total Retrieval Time": f"{quantize_time + search_time + load_time + rescore_time + sort_time:.4f} s",
     }
+
+
+if __name__ == "__main__":
+    add_relevant_links.serve(name="local-generate-links")

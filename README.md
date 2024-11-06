@@ -12,6 +12,10 @@
 
 `prefect cloud login`
 
+#### Create credential blocks in Prefect Cloud:
+
+
+
 #### Login to AWS:
 
 `aws configure`

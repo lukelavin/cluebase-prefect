@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional
 import requests
 from prefect.utilities.asyncutils import run_sync_in_worker_thread
 from prefect_aws import AwsCredentials, S3Bucket
-from pymongo import AsyncMongoClient
+from pymongo import AsyncMongoClient, MongoClient
 from pymongo.database import Database
 
 file_logger = getLogger(__name__)
