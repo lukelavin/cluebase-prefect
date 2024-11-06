@@ -1,6 +1,6 @@
 name: Prefect Cloud Deploy
 on:
-  workflow-dispatch:
+  workflow_dispatch:
   push:
     branches:
       - main
