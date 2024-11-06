@@ -7,7 +7,7 @@ on:
     paths:
       - "workflows/create-deployments.py"
       - ".github/workflows/prefect-cloud-deploy.yaml"
-      
+
 jobs:
   deploy_flow:
     runs-on: ubuntu-latest
@@ -17,6 +17,11 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           python-version: '3.10'
+          cache: 'pip'
+
+      - name: Install prefect dependencies
+        run: |
+          python -m pip install prefect prefect-github
       
       - name: Prefect Auth
         uses: PrefectHQ/actions-prefect-auth@v2
