@@ -7,4 +7,5 @@ load_logs
 .*
 
 !/.gitignore
+!/.github
 wikipedia-embeds
