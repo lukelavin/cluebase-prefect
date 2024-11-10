@@ -1,7 +1,8 @@
 from prefect import flow
 
 from workflows.load_to_mongo.load_clues_set import load_clues_from_set_s3
-from workflows.ml_features.classify_domain import classify_domains
+
+# from workflows.ml_features.classify_domain import classify_domains
 from workflows.scrape.refresh_latest_season import refresh_latest_season
 
 
@@ -13,4 +14,4 @@ def parse_and_load_latest_season(
 
     load_clues_from_set_s3(game_ids, bucket_name, s3_games_path)
 
-    classify_domains()
+    # classify_domains()
