@@ -5,7 +5,7 @@ on:
     branches:
       - master
     paths:
-      - "workflows/create-deployments.py"
+      - "workflows/create_deployments.py"
       - ".github/workflows/prefect-cloud-deploy.yaml"
 
 jobs:
