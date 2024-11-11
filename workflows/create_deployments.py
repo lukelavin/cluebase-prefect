@@ -64,7 +64,7 @@ if __name__ == "__main__":
         name="parse-load-latest-season-main",
         work_pool_name="my-work-pool",
         cron="0 2 * * *",
-        job_variables={"pip_packages": pip_packages + ml_pip_packages},
+        job_variables={"pip_packages": pip_packages},
     )
 
     flow.from_source(
